@@ -1,0 +1,4 @@
+export const STORY_HEADER_HEIGHT = 48;
+export const STORY_AVATAR_SIZE = 42;
+
+const BOTTOM_IMAGE_HEIGHT = 160;
