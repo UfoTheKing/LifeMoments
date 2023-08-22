@@ -1,6 +1,70 @@
 import axios from "axios";
 import { EmojiItemProp } from "react-native-reactions/lib/components/ReactionView/types";
 
+export const API_URL = `http://10.167.12.166:8000`;
+// export const API_URL = "http://192.168.178.141:8000";
+
+export interface ErrorResponseType {
+  message: string;
+  statusCode: number;
+  data?: any;
+}
+
+export interface Pagination {
+  pageSize: number;
+  pageNumber: number;
+  total: number;
+}
+
+export function instanceOfErrorResponseType(
+  object: any
+): object is ErrorResponseType {
+  return "message" in object && "statusCode" in object;
+}
+
+const client = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    return Promise.reject(handleError(error));
+  }
+);
+
+const handleError = (error: unknown) => {
+  // console.log(error);
+  var message = "An unexpected error occurred.";
+  var statusCode = 500;
+  var data = undefined;
+
+  if (axios.isAxiosError(error)) {
+    message = error.response?.data.message || "An unexpected error occurred.";
+    statusCode = error.response?.data.statusCode
+      ? error.response?.data.statusCode
+      : error.response?.status
+      ? error.response?.status
+      : 500;
+    data = error.response?.data.data ? error.response?.data.data : undefined;
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
+
+  const object: ErrorResponseType = {
+    message,
+    statusCode,
+    data,
+  };
+
+  return object;
+};
+
+export default client;
+
 export const ReactionItems: EmojiItemProp[] = [
   {
     id: 0,
@@ -87,7 +151,6 @@ export const FetchPhotos = async () => {
     let randomAvatars = [
       "https://www.w3schools.com/howto/img_avatar.png",
       "https://www.w3schools.com/howto/img_avatar2.png",
-      "https://www.w3schools.com/howto/img_avatar3.png",
     ];
 
     let randomUsernames = [
@@ -134,6 +197,8 @@ export const FetchPhotos = async () => {
     photo.location =
       randomPlaces[Math.floor(Math.random() * randomPlaces.length)];
     photo.posted = randomPost[Math.floor(Math.random() * randomPost.length)];
+
+    photo.userId = Math.floor(Math.random() * 1000000);
     photo.username =
       randomUsernames[Math.floor(Math.random() * randomUsernames.length)];
     photo.avatar =

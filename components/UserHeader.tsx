@@ -1,19 +1,28 @@
-import React from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { STORY_AVATAR_SIZE, STORY_HEADER_HEIGHT } from "./Layout";
+import React from "react";
+import { STORY_AVATAR_SIZE, STORY_HEADER_HEIGHT } from "./Story/Layout";
 import { ScreenWidth } from "@/constants/Layout";
-import { FeedUser } from "@/models/project/Feed";
 import { useTheme } from "native-base";
+import { Ionicons } from "@expo/vector-icons";
 
-interface StoryHeaderProps {
-  user: FeedUser;
-  location: string;
-  posted: string;
-}
+type Props = {
+  username: string;
+  profilePictureUrl: string | null;
+  isVerified: boolean;
 
-const StoryHeader = (props: StoryHeaderProps) => {
-  const { user, location, posted } = props;
+  bgc?: string;
+  rightComponent?: React.ReactNode;
+  paddingHorizontal?: number;
+};
+
+const UserHeader = (props: Props) => {
+  const {
+    username,
+    profilePictureUrl,
+    isVerified,
+    bgc = "#fff",
+    paddingHorizontal = 0,
+  } = props;
 
   const colors = useTheme().colors;
 
@@ -22,19 +31,20 @@ const StoryHeader = (props: StoryHeaderProps) => {
       style={[
         {
           height: STORY_HEADER_HEIGHT,
-          backgroundColor: "#f7f7f7",
+          backgroundColor: bgc,
           width: ScreenWidth,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          paddingHorizontal,
         },
       ]}
     >
       <View style={styles.boxUserInfos}>
         <View style={styles.boxUserAvatar}>
-          {user && user.profilePictureUrl ? (
+          {profilePictureUrl ? (
             <Image
-              source={{ uri: user.profilePictureUrl }}
+              source={{ uri: profilePictureUrl }}
               style={{ ...StyleSheet.absoluteFillObject, borderRadius: 100 }}
             />
           ) : (
@@ -48,11 +58,11 @@ const StoryHeader = (props: StoryHeaderProps) => {
           )}
         </View>
         <View style={styles.boxUserName}>
-          {user.isVerified ? (
+          {isVerified ? (
             <TouchableOpacity>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-                  {user.username}
+                  {username}
                 </Text>
                 <Ionicons
                   name="checkmark-circle"
@@ -63,26 +73,16 @@ const StoryHeader = (props: StoryHeaderProps) => {
               </View>
             </TouchableOpacity>
           ) : (
-            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-              {user.username}
-            </Text>
+            <Text style={{ fontWeight: "bold", fontSize: 14 }}>{username}</Text>
           )}
-
-          <Text style={{ fontSize: 12, color: "#737373" }}>
-            {location} • {posted}
-          </Text>
         </View>
       </View>
-      <View style={styles.boxUserActions}>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-horizontal" size={24} />
-        </TouchableOpacity>
-      </View>
+      {props.rightComponent}
     </View>
   );
 };
 
-export default StoryHeader;
+export default UserHeader;
 
 const styles = StyleSheet.create({
   boxUserInfos: {

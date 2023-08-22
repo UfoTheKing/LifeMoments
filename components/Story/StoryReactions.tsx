@@ -1,52 +1,55 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { memo } from "react";
-import { ReactionItems } from "@/api/client";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Reaction } from "react-native-reactions";
-import { EmojiItemProp } from "react-native-reactions/lib/components/ReactionView/types";
 
 type Props = {
-  index?: number;
-  reaction?: EmojiItemProp;
-  setSelectedEmoji?: (e: EmojiItemProp | undefined) => void;
+  reactionsCount: number;
+  emojiLineReactions?: Array<string>;
+  onPressReactions?: () => void;
 };
 
 const StoryReactions = (props: Props) => {
-  const { reaction, index, setSelectedEmoji } = props;
+  const { reactionsCount, emojiLineReactions, onPressReactions } = props;
+
+  const lessText = React.useMemo(() => {
+    if (reactionsCount >= 1000) {
+      return `${Math.floor(reactionsCount / 1000)}k Reactions`;
+    }
+
+    return `${reactionsCount} Reactions`;
+  }, [reactionsCount]);
+
+  if (reactionsCount === 0) {
+    return null;
+  }
 
   return (
     <View style={styles.boxReactions}>
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Reaction
-          items={ReactionItems}
-          onTap={setSelectedEmoji}
-          itemIndex={index}
+      {emojiLineReactions && emojiLineReactions.length > 0 && (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+          }}
         >
-          {reaction ? (
-            <Text style={styles.textEmoji}>{reaction.emoji}</Text>
-          ) : (
-            <View style={styles.boxReaction}>
-              <MaterialCommunityIcons name="lightning-bolt" size={24} />
-            </View>
-          )}
-        </Reaction>
-      </View>
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-          height: 40,
-        }}
-      >
-        <Text style={styles.textReactionsCount}>1.2k Reactions</Text>
-      </View>
+          {emojiLineReactions.map((emoji, index) => (
+            <Text
+              style={{
+                ...styles.textEmoji,
+                position: "relative",
+                left: index === 0 ? 0 : index * -10,
+              }}
+            >
+              {emoji}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      <TouchableOpacity onPress={onPressReactions}>
+        <Text style={styles.textReactionsCount}>{lessText}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -56,13 +59,14 @@ export default memo(StoryReactions);
 const styles = StyleSheet.create({
   boxReactions: {
     // paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "flex-end",
     height: 40,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flex: 1,
   },
   textEmoji: {
-    fontSize: 24,
+    fontSize: 14,
   },
   textReactionsCount: {
     fontSize: 14,

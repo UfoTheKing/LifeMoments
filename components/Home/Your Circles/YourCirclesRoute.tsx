@@ -48,15 +48,7 @@ const YourCirclesRoute = (props: Props) => {
     >
       <FlatList
         data={data}
-        renderItem={({ item, index }) => (
-          <Story
-            item={item}
-            setSelectedEmoji={(e) => {
-              console.log(e);
-            }}
-            index={index}
-          />
-        )}
+        renderItem={({ item, index }) => <Story item={item} index={index} />}
         keyExtractor={(item) => item.id}
         onScroll={handleScroll}
         scrollEventThrottle={16}

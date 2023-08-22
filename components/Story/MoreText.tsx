@@ -1,3 +1,4 @@
+import { FeedCaption } from "@/models/project/Feed";
 import React, { useEffect, useState, useRef } from "react";
 import {
   Animated,
@@ -6,8 +7,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
-const MoreText = (props: any) => {
+type Props = {
+  caption: FeedCaption;
+};
+
+const MoreText = (props: Props) => {
   const startingHeight = 20;
   const [expander, setExpander] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -16,9 +22,17 @@ const MoreText = (props: any) => {
 
   // Prima dell'Read More mostro solo la prima riga: cioè prendo la prima stringa finchè non trovo il carattere \n
   const ReadLessText = React.useMemo(() => {
-    const firstLine = props.text.split("\n")[0];
+    const firstLine =
+      props.caption && props.caption.text
+        ? props.caption.text.split("\n")[0]
+        : "";
     return firstLine;
-  }, [props.text]);
+  }, [props.caption.text]);
+
+  const numberOfLines = React.useMemo(() => {
+    if (!props.caption || !props.caption.text) return 0;
+    return props.caption.text.split("\n").length;
+  }, [props.caption.text]);
 
   useEffect(() => {
     // expanded?setText(props.text): setText(props.text.substring(0, 40));
@@ -47,22 +61,16 @@ const MoreText = (props: any) => {
             onTextLayout(e);
           }}
         >
-          <Text style={styles.text}>{props.text}</Text>
+          <Text style={styles.text}>{props.caption.text}</Text>
         </View>
       </Animated.View>
 
-      {expander && (
-        <React.Fragment>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              setExpanded(!expanded);
-            }}
-          >
-            <Text style={styles.readBtn}>
-              {expanded ? "Read Less" : "Read More"}
-            </Text>
-          </TouchableWithoutFeedback>
-        </React.Fragment>
+      {numberOfLines > 1 && expander && !expanded && (
+        <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+          <Text style={styles.readBtn}>
+            {expanded ? "Read Less" : "Read More"}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
